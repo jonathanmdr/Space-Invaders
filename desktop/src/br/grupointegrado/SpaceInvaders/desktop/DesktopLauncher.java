@@ -2,6 +2,7 @@ package br.grupointegrado.SpaceInvaders.desktop;
 
 import com.badlogic.gdx.backends.lwjgl.LwjglApplication;
 import com.badlogic.gdx.backends.lwjgl.LwjglApplicationConfiguration;
+
 import br.grupointegrado.SpaceInvaders.MainGame;
 
 public class DesktopLauncher {
