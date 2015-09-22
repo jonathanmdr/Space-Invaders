@@ -1,7 +1,9 @@
 package br.grupointegrado.SpaceInvaders;
 
+import com.badlogic.gdx.Application;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.Preferences;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
@@ -15,6 +17,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeType;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
+import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -183,6 +186,7 @@ public class TelaJogo extends TelaBase {
             if(musicaFundo.isPlaying()){ // testa se a musica está tocando
                 musicaFundo.stop(); // parar musica
             }
+            reiniciarJogo();
         }
 
         //Atualiza a situação do palco.
@@ -193,6 +197,24 @@ public class TelaJogo extends TelaBase {
         //Desenha o palco de informações
         palcoInformacoes.act(delta);
         palcoInformacoes.draw();
+    }
+
+    /**
+     * verifica se o usuario pressionou ENTER para reiniciar o jogo
+     */
+    private void reiniciarJogo() {
+        if(Gdx.input.isKeyJustPressed(Input.Keys.ENTER)){
+            Preferences preferencias = Gdx.app.getPreferences("SpaceInvaders");
+            int pontuacaoMaxima = preferencias.getInteger("pontuacao_maxima", 0);
+
+            //verifica se a nova pontuacao feita é maior que a pontuacao maxima salva
+            if(pontuacao > pontuacaoMaxima){
+                preferencias.putInteger("pontuacao_maxima", pontuacao);
+                preferencias.flush();
+            }
+
+            game.setScreen(new TelaMenu(game));
+        }
     }
 
     private void atualizarExplosoes(float delta) {
@@ -411,15 +433,51 @@ public class TelaJogo extends TelaBase {
         indoEsquerda = false;
         atirando = false;
 
-        if(Gdx.input.isKeyPressed(Input.Keys.LEFT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.LEFT) || clicouEsquerda()){
             indoEsquerda = true;
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT)){
+        if(Gdx.input.isKeyPressed(Input.Keys.RIGHT) || clicouDireita()){
             indoDireita = true;
         }
-        if(Gdx.input.isKeyPressed(Input.Keys.SPACE)){
+        if(Gdx.input.isKeyPressed(Input.Keys.SPACE) || Gdx.app.getType() == Application.ApplicationType.iOS){
             atirando = true;
         }
+    }
+
+    private boolean clicouDireita() {
+        if(Gdx.input.isTouched()) {
+            Vector3 posicao = new Vector3();
+            //captura clique/toque na janela do jogo
+            posicao.x = Gdx.input.getX();
+            posicao.y = Gdx.input.getY();
+            posicao.z = 0;
+            //converter para uma coordenada do jogo
+            posicao = camera.unproject(posicao);
+            float meio = camera.viewportWidth / 2;
+
+            if (posicao.x > meio) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean clicouEsquerda() {
+        if(Gdx.input.isTouched()) {
+            Vector3 posicao = new Vector3();
+            //captura clique/toque na janela do jogo
+            posicao.x = Gdx.input.getX();
+            posicao.y = Gdx.input.getY();
+            posicao.z = 0;
+            //converter para uma coordenada do jogo
+            posicao = camera.unproject(posicao);
+            float meio = camera.viewportWidth / 2;
+
+            if (posicao.x < meio) {
+                return true;
+            }
+        }
+        return false;
     }
 
 
